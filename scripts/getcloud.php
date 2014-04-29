@@ -8,7 +8,7 @@ ini_set('max_execution_time', 300); //300 seconds = 5 minutes
 function say_hello() {
 	
 	
-$dbconn = pg_connect("host=localhost port=5432 dbname=lidar user=postgres password=kjartan");
+$dbconn = pg_connect("host=localhost port=5433 dbname=mbe user=postgres password=kjartan");
 
 $result = null;
 
@@ -18,16 +18,9 @@ if(!$dbconn) die('coud not connect to pgsql');
 				
 
 	$result = pg_query($dbconn, 
-		"WITH pts AS (SELECT PC_Explode(pa)::geometry AS pt FROM southfinland_dimensional
-	WHERE PC_Intersects(
-		pa, ST_Transform(ST_SetSRID(ST_MakePolygon(ST_GeomFromText('LINESTRING(
-		22.276919335126877 60.45175795282388,
-		22.276919335126877 60.45309125547298,
-		22.2803096473217 60.45309125547298, 
-		22.2803096473217 60.45175795282388,
-		22.276919335126877 60.45175795282388)')),4326),3067)))
+		"WITH pts AS (SELECT PC_Explode(pa)::geometry AS pt FROM franklin_asfound)
 
-		SELECT 1, ST_X(pt::geometry) x, ST_Y(pt::geometry) y, ST_Z(pt::geometry) z, 65536 , 65536 , 65536, 1, 1 FROM pts;");
+		SELECT 1, ST_X(pt::geometry) x, ST_Y(pt::geometry) y, ST_Z(pt::geometry)*-1 z, 65536 , 65536 , 65536, 1, 1 FROM pts;");
 		
 
 
