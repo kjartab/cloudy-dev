@@ -12,39 +12,27 @@
 
 <body>
 
-
-  <script src="js/three.js"></script>
-  <script src="js/OrbitControls.js"></script>
-  <script src="js/pointloader.js"></script>
-  
+	<script src="js/three.js"></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/pointloader.js"></script>
 	<script src="js/leaflet.js"></script>
 	<script src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
-	
-	<div id="header" class="navbar navbar-default navbar-fixed-top">
+
+	<div id="header" class="navbar-default navbar-fixed-top">
 		<div class="navbar-header col-md-2" >
-			<img id="logo" src="../images/isas.png"></img>
-			<a class="navbar-brand" href="#">iSurvey</a>
-		</div>
-		<div class="collapse navbar-collapse">
-			<ul class="nav navbar-nav">
-				<li><a href="../">Home</a></li>
-			</ul>
+			<a class="navbar-brand" href="#">Cloudy-dev</a>
 		</div>
 	</div>
-<div id="wrapper">
-	<div id="main-wrapper" class="col-md-2">
-		<ul class="nav navbar-nav">
-		</ul>
-	</div>
+	
+	<div id="wrapper">
+		<div id="main-wrapper" class="col-md-2">
+			<ul class="nav navbar-nav"></ul>
+		</div>
 	<div id="main-wrapper" class="col-md-10">
-		<div id="pointview">
-		 
-		 
-		  
-		  </div>
+		<div id="pointview"></div>
 	</div>
-</div>
+	</div>
 
 
   <script>
@@ -55,8 +43,6 @@
 		controls.center
 	}
 	
-	
-			
 	function getUrlVars() {
 		var vars = {};
 		var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
@@ -65,10 +51,11 @@
 		return vars;
 	}
 	
-	
-			var outline = getUrlVars()["outline"];
+	var outline = getUrlVars()["outline"];
+	var id = getUrlVars()["id"];
+	var option = getUrlVars()["option"];
+	var extra = getUrlVars()["extra"];
 
-	
 	$(window).resize(function () {
 				var h = $(window).height(),
 					offsetTop = 50; // Calculate the top offset
@@ -82,7 +69,7 @@
 				$.ajax({
 					 async: true,
 					 type: 'GET',
-					 url: 'scripts/getpartofcloud.php?outline='+outline,
+					 url: 'scripts/getpartofcloud.php?outline='+outline+'&id='+id+'&option='+option+"&extra="+extra,
 					 success: function(indata) {
 						data = JSON.parse(indata);
 						k = loadPointData(data);

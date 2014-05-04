@@ -6,8 +6,7 @@ var K = {
 	
 
 	K.addMap = function(divelement) {
-		
-		K.map = L.map(divelement).setView([62.00, 10.00], 5);
+		K.map = L.map(divelement).setView([56.9648487562327, 1.8675290264099], 17);
 
 		// -------------- Adding draw --------------
 				
@@ -33,15 +32,19 @@ var K = {
 				layer = e.layer;
 
 			if (type === 'marker') {
-				console.log('marker');
+				K.startViewer(K.toWKT(e.layer),-1,'buffer',-1);
 			}
 			
-			if (type === 'polygon') {
-				console.log('polygon');
+			if (type === 'rectangle' || type === 'polygon') {
+				K.startViewer(K.toWKT(e.layer),-1,'polygon',-1);
 			}
 			
-				K.startViewer(K.toWKT(e.layer));
-				console.log(K.toWKT(e.layer));
+			if (type === 'circle') {
+				var radius = layer._mRadius;
+				console.log(radius);
+				K.startViewer(K.toWKT(e.layer),-1,'circle',radius);
+				
+			}
 
 			// Do whatever else you need to. (save to db, add to map etc)
 			K.getMap().addLayer(layer);
@@ -63,7 +66,6 @@ var K = {
 	
 	
 	K.addData = function(data) {
-		console.log(data);
 		K.geoJsonLayer.addData(JSON.parse(data[3]));
 	}
 	
@@ -81,7 +83,6 @@ var K = {
 				
 		var layer = e.target;
 
-		console.log(layer);	
 		layer.setStyle({
 			weight: 4,
 			fillColor: "#0A0AD1",
@@ -114,9 +115,10 @@ var K = {
 		K.getMap().fitBounds(e.target.getBounds());
 	}
 	
-	K.startViewer = function(outline) {
+	K.startViewer = function(outline, id, option, extra) {
 		if(outline != null) {
-			open("viewer.html?outline="+outline);
+			console.log(extra);
+			open("viewer.html?outline="+outline+"&id="+id+"&option="+option+"&extra="+extra);
 		} else {
 			window.alert("No point cloud selected");
 		}
@@ -124,7 +126,8 @@ var K = {
 	
     K.toWKT = function(layer) {
 		var lng, lat, coords = [];
-		if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
+		
+		if (layer instanceof L.Polygon || layer instanceof L.Polyline ) {
 			var latlngs = layer.getLatLngs();
 			for (var i = 0; i < latlngs.length; i++) {
 				latlngs[i]
@@ -139,6 +142,8 @@ var K = {
 			} else if (layer instanceof L.Polyline) {
 				return "LINESTRING(" + coords.join(",") + ")";
 			}
+		} else if (layer instanceof L.Circle) {
+			return "ST_MakePoint(" + layer.getLatLng().lng + "," + layer.getLatLng().lat + ")";
 		} else if (layer instanceof L.Marker) {
 			return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
 		}
