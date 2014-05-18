@@ -39,7 +39,7 @@ if(!$dbconn) die('coud not connect to pgsql');
 			"WITH pts AS(
 				WITH pcs AS( 
 					WITH outline AS( 
-						SELECT ST_SetSRID(ST_Transform(ST_Buffer(ST_Transform(ST_SetSRID(" .$outline. ",4326),32632),15),100031),32632) the_outline
+							the_outline
 					)
 					SELECT id covered_patches FROM franklin_asleft, outline WHERE PC_Intersects(pa, the_outline)
 				)

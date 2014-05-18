@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>iSurvey</title>
+	<title>Cloudy</title>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	
@@ -14,6 +14,7 @@
 
 	<script src="js/three.js"></script>
 	<script src="js/OrbitControls.js"></script>
+	<script src="js/TrackballControls.js"></script>
 	<script src="js/pointloader.js"></script>
 	<script src="js/leaflet.js"></script>
 	<script src="js/jquery.min.js"></script>
@@ -69,7 +70,7 @@
 				$.ajax({
 					 async: true,
 					 type: 'GET',
-					 url: 'scripts/getpartofcloud.php?outline='+outline+'&id='+id+'&option='+option+"&extra="+extra,
+					 url: 'scripts/getpartofhelsinki.php?outline='+outline+'&id='+id+'&option='+option+"&extra="+extra,
 					 success: function(indata) {
 						data = JSON.parse(indata);
 						k = loadPointData(data);
@@ -117,7 +118,7 @@
 			scene.add(light);
 			scene.add(k);
 			scene.add(axes);
-			controls = new THREE.OrbitControls(camera, renderer.domElement);
+			controls = new THREE.TrackballControls(camera, renderer.domElement);
 
     }
 

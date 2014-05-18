@@ -4,21 +4,17 @@ var K = {
 	version: '0.1-dev',
 	}
 	
-
+	// Constructs a map and binds it to the incoming DOM object, divelement
 	K.addMap = function(divelement) {
 		K.map = L.map(divelement).setView([56.9648487562327, 1.8675290264099], 17);
-
-		// -------------- Adding draw --------------
-				
+		
 		L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
 		}).addTo(K.getMap());
 		
-		// Initialise the FeatureGroup to store editable layers
 		K.drawnItems = new L.FeatureGroup();
 		K.getMap().addLayer(K.drawnItems);
 
-		// Initialise the draw control and pass it the FeatureGroup of editable layers
 		K.drawControl = new L.Control.Draw({
 			edit: { 
 				featureGroup: K.drawnItems
@@ -26,6 +22,7 @@ var K = {
 			position: 'bottomright'
 		});
 		K.getMap().addControl(K.drawControl);
+		
 		
 		K.getMap().on('draw:created', function (e) {
 			var type = e.layerType,
@@ -40,16 +37,12 @@ var K = {
 			}
 			
 			if (type === 'circle') {
-				var radius = layer._mRadius;
-				console.log(radius);
-				K.startViewer(K.toWKT(e.layer),-1,'circle',radius);
+				K.startViewer(K.toWKT(e.layer),-1,'circle',layer._mRadius);
 				
 			}
-
-			// Do whatever else you need to. (save to db, add to map etc)
+			
 			K.getMap().addLayer(layer);
 		});
-		
 		
 	}
 	
@@ -66,29 +59,48 @@ var K = {
 	
 	
 	K.addData = function(data) {
-		K.geoJsonLayer.addData(JSON.parse(data[3]));
+		
+		K.geoJsonLayer.addData(JSON.parse(data[3]));	
+		return K.geoJsonLayer;
 	}
 	
 	
 	K.onEachFeature = function(feature, layer) {
+		
 		layer.on({
 			mouseover: K.highlightFeature,
 			mouseout: K.resetHighlight,
 			click: K.zoomToFeature
 		});
+		
 	}
 	
 	
 	K.highlightFeature = function(e) {
-				
+		K.setActivePolygon(e);
 		var layer = e.target;
-
-		layer.setStyle({
-			weight: 4,
-			fillColor: "#0A0AD1",
-			color: "#3366CC",
-			fillOpacity: 0.7
-		});
+		switch(layer.feature.geometry.type) {
+			case 'Polygon':
+				layer.setStyle({
+					weight: 1,
+					fillColor: "#0A0AD1",
+					color: "#3366CC",
+					fillOpacity: 0.3
+				});
+			break;
+			
+			case 'Point':
+				layer.setStyle({
+				weight: 4,
+				fillColor: "#0A0AD1",
+				color: "#3366CC",
+				fillOpacity: 0.7
+			});
+			break;
+			
+			
+		}
+		
 
 		if (!L.Browser.ie && !L.Browser.opera) {
 			layer.bringToFront();
@@ -98,18 +110,44 @@ var K = {
 	
 	K.resetHighlight = function(e) {
 		K.geoJsonLayer.resetStyle(e.target);
+		K.activePolygon = '';
+	}
+	
+	K.setActivePolygon = function(e) {
+		K.activePolygon = e.target;
+		console.log('Active polygon:');
+		console.log(e);
+	}
+	
+	K.getActivePolygon = function() {
+		return K.activePolygon;
 	}
 	
 
 	K.style = function(feature) {
-		return {
-			fillColor: "#2233dd",
-			weight: 1,
-			opacity: 0.8,
-			color: "#2233dd",
-			fillOpacity: 0.9
-		};
+		switch(feature.geometry.type) {
+			case 'Polygon':
+				return {
+					fillColor: "#2233dd",
+					weight: 1,
+					opacity: 1,
+					color: "#2233dd",
+					fillOpacity: 0.3
+				};
+			break;
+			
+			case 'Point':
+				return {
+					fillColor: "#2233dd",
+					weight: 1,
+					opacity: 0.8,
+					color: "#2233dd",
+					fillOpacity: 0.9
+				};
+			break;
+		}
 	}
+	
 	
 	K.zoomToFeature = function(e) {
 		K.getMap().fitBounds(e.target.getBounds());
