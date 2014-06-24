@@ -1,4 +1,4 @@
-// Extends Leaflet and adds functionality for map-dom interaction
+// Extends Leaflet and adds functionality for map-dom interaction
 
 var K = {
 	version: '0.1-dev',
@@ -54,13 +54,13 @@ var K = {
 	
 	K.addGeoJsonLayer = function() {
 		K.geoJsonLayer =  L.geoJson(null,{onEachFeature: K.onEachFeature, style : K.style}).addTo(K.map);
-		return K.geoJsonLayer;
+		return K.geoJsonLayer;	
 	}	
 	
 	
 	K.addData = function(data) {
-		
-		K.geoJsonLayer.addData(JSON.parse(data[3]));	
+		console.log(data[3]);		
+		K.geoJsonLayer.addData(JSON.parse(data[3]));
 		return K.geoJsonLayer;
 	}
 	
