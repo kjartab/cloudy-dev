@@ -13,7 +13,7 @@ Class DatabaseHelper {
 	
     public function __construct() {
 		$this->host = 'localhost';
-		$this->port = '5433';
+		$this->port = '5432';
 		$this->dbname = 'langeland';
 		$this->user = 'langeland';
 		$this->password = 'lillehammerol';
@@ -21,7 +21,7 @@ Class DatabaseHelper {
 	
 	public function connect() {	
 		if ($this->dbconn == null) {
-			$this->dbconn = pg_connect("host=localhost port=5433 dbname=mbe user=postgres password=kjartan");
+			$this->dbconn = pg_connect("host=localhost port=5432 dbname=lidardb user=postgres password=kjartan");
 		} else {
 			echo 'connection already established';	
 		}

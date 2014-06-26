@@ -1,8 +1,8 @@
 // Extends Leaflet and adds functionality for map-dom interaction
-function Cloud(divelement) {
+function Cloud(mapdivelement) {
 
 	version: '0.1',
-	map = L.map(divelement).setView([56.9648487562327, 1.8675290264099], 14);
+	map = L.map(mapdivelement).setView([56.9648487562327, 1.8675290264099], 8);
 	map.addLayer(L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}));
 	
 	
@@ -45,47 +45,127 @@ function Cloud(divelement) {
 	
 }
 
-	Cloud.prototype.addMapObject = function(item, list) {
-		
-		this.addGeoJson(item);
-		this.addToList(list, item.props.name, item.props.dbid);
-	}
+function getCloud() {
+	return cloudy;
+}
+
+Cloud.prototype.addMapObject = function(item, list) {
 	
-	Cloud.prototype.addGeoJson = function(jsonobject) {	
-		geojson.addData(jsonobject);
-	}
+	this.addGeoJson(item);
+	this.addToList(list, item.props.name, item.props.dbid);
+}
+
+Cloud.prototype.addGeoJson = function(jsonobject) {	
+	geojson.addData(jsonobject, {onEachFeature: getCloud().onEachFeature, style : getCloud().style});
+}
+
+
+
+Cloud.prototype.addToList = function(listdiv, name, dbid) {
 	
-	function getLeafletObject(dbid) {
-		geojson.eachLayer(function (layer) {
-			if (getLeafletDbId(layer) == dbid) {
-				layer.setStyle({
-					weight: 6,
-					fillColor: '#333333',
-					color: '#333333',
-					fillOpacity: 0.7
-				});
-				map.panTo(layer.getBounds().getCenter(), {animate : true, duration: 0.5});
-			}
+	var anchor = document.createElement("a");
+	anchor.className+=" list-group-item";
+	anchor.innerHTML = name;
+	anchor.dbid = dbid;
+	anchor.onclick = function() { getCloud().getLeafletObject(dbid) };
+	listdiv.append(anchor);
+}
+
+
+
+Cloud.prototype.getLeafletObject = function(dbid) {
+	geojson.eachLayer(function (layer) {
+		if (getCloud().getLeafletDbId(layer) == dbid) {
+			layer.setStyle({
+				weight: 6,
+				fillColor: '#333333',
+				color: '#333333',
+				fillOpacity: 0.7
+			});
+			map.panTo(layer.getBounds().getCenter(), {animate : true, duration: 0.5});
+		}
+	});
+}
+
+
+Cloud.prototype.getLeafletDbId = function(leafletobj) {
+	return leafletobj.feature.geometry.props.dbid;
+}
+
+Cloud.prototype.style = function(feature) {
+		switch(feature.geometry.type) {
+			case 'Polygon':
+				return {
+					fillColor: "#2233dd",
+					weight: 1,
+					opacity: 1,
+					color: "#2233dd",
+					fillOpacity: 0.3
+				};
+			break;
 			
+			case 'Point':
+				return {
+					fillColor: "#2233dd",
+					weight: 1,
+					opacity: 0.8,
+					color: "#2233dd",
+					fillOpacity: 0.9
+				};
+			break;
+		}
+	}
+	
+
+Cloud.prototype.onEachFeature = function(feature, layer) {
+		
+		layer.on({
+			mouseover: getCloud().highlightFeature,
+			mouseout: getCloud().resetHighlight,
+			click: getCloud().zoomToFeature
 		});
 		
+	}
+
+Cloud.prototype.zoomToFeature = function() {
+	getMap().fitBounds(e.target.getBounds());
+}
+
+Cloud.prototype.resetHighlight = function(e) {
+		geojson.resetStyle(e.target);
+		activePolygon = '';
+	}
+
+
+
+Cloud.prototype.highlightFeature = function(e) {
+
+
+		var layer = e.target;
+		switch(layer.feature.geometry.type) {
+			case 'Polygon':
+				layer.setStyle({
+					weight: 1,
+					fillColor: "#0A0AD1",
+					color: "#3366CC",
+					fillOpacity: 0.3
+				});
+			break;
+			
+			case 'Point':
+				layer.setStyle({
+				weight: 4,
+				fillColor: "#0A0AD1",
+				color: "#3366CC",
+				fillOpacity: 0.7
+			});
+			break;
+			
+			
+		}
 		
-	}
 
-	function getLeafletDbId(leafletobj) {
-		return leafletobj.feature.geometry.props.dbid;
+		if (!L.Browser.ie && !L.Browser.opera) {
+			layer.bringToFront();
+		}
 	}
-	
-	
-	Cloud.prototype.addToList = function(listdiv, name, dbid) {
-		var anchor = document.createElement("a");
-		anchor.className+=" list-group-item";
-		anchor.innerHTML = name;
-		anchor.dbid = dbid;
-			anchor.onclick = function() {getLeafletObject(dbid)};
-		listdiv.append(anchor);
-
-	}
-
-    
-	
