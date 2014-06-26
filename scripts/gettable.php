@@ -3,7 +3,7 @@
 
 		
 		header('Content-Type: application/json');
-	$dbconn = pg_pconnect("host=localhost port=5432 dbname=lidar user=postgres password=kjartan sslmode=disable") or die('Could not connect: ' . pg_last_error());
+	$dbconn = pg_pconnect("host=localhost port=5433 dbname=mbe user=postgres password=kjartan sslmode=disable") or die('Could not connect: ' . pg_last_error());
 
 
 			

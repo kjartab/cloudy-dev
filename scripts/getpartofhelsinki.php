@@ -14,7 +14,7 @@ $id = $_GET["id"];
 $option = $_GET["option"];
 $extra = $_GET["extra"];
 
-$dbconn = pg_connect("host=localhost port=5433 dbname=mbe user=postgres password=kjartan");
+$dbconn = pg_connect("host=localhost port=5432 dbname=mbe user=postgres password=kjartan");
 
 $result = null;
 
