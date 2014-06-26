@@ -1,0 +1,120 @@
+<html>
+<head>
+	<title>Cloudy</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="stylesheet" href="css/leaflet.css"/>
+	<link rel="stylesheet" href="css/leaflet.draw.css"/>
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/c2.css">
+	
+</head>
+
+<body>
+
+	<script src="js/leaflet.js"></script>
+	<script src="js/leaflet.draw.js"></script>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/cloudy.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	
+
+	
+	<div id="wrapper">
+
+		<div class="left">
+			<ul id="resultlist"></ul>
+		</div>
+			
+			
+		<div class="right">
+			<div id="map"></div>
+		</div>
+			
+	
+	</div>
+
+	<script> 
+	$(window).resize(function () {
+		
+		var contentwidth = $('#left').width();
+		$('#map').css('height', $(window).height());
+		$('#map').css('width', $(window).width()-contentwidth-200);
+		console.log($('#left').width());
+		console.log($('#right').width());
+	}).resize();
+	
+	cloudy = new Cloud('map');
+	
+	
+	$.getJSON('scripts/gettable.php', function (data) {
+		
+		var list = $("#resultlist");
+		
+		for (var i=0; i<data.length; i++) {
+			var item = JSON.parse(data[i][3]);
+			item.props = { 
+				name : data[i][1],
+				dbid : data[i][0]
+			};
+			
+			cloudy.addMapObject(item, list);
+		}
+		
+	});
+	/*
+	$.getJSON('scripts/getsubsea.php', function (data) {
+		
+		var list = document.getElementById('resultlist');
+		
+		for (var i=0; i<data.length; i++) {
+			K.addData(data[i]);
+			list.innerHTML = list.innerHTML + ' <li><a onclick="clickItem(' + data[i][0] + ');">'+	data[i][1] + '</a></li>';
+
+		}
+		
+	});
+	
+	$.getJSON('scripts/getrigs.php', function (data) {
+		
+		var list = document.getElementById('resultlist');
+		
+		for (var i=0; i<data.length; i++) {
+			K.addData(data[i]);
+			list.innerHTML = list.innerHTML + ' <li><a onclick="clickItem(' + data[i][0] + ');">'+	data[i][1] + '</a></li>';
+
+		}
+		
+	});
+	
+	$.getJSON('scripts/getbalder.php', function (data) {
+		
+		var list = document.getElementById('resultlist');
+		
+		for (var i=0; i<data.length; i++) {
+			K.addData(data[i]);
+			list.innerHTML = list.innerHTML + ' <li><a onclick="clickItem(' + data[i][0] + ');">'+	data[i][1] + '</a></li>';
+
+		}
+		
+	});
+	
+	function buildParameters(id, outline) {
+		
+		var params = '';
+		params += 'id='+id;
+		params += '&outline='+outline;
+		
+		return params;
+	}
+
+	*/
+	
+	</script>
+
+
+</body>
+
+</html>
+

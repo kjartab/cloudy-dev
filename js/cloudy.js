@@ -2,9 +2,8 @@
 function Cloud(divelement) {
 
 	version: '0.1',
-		K.map = L.map(divelement).setView([56.9648487562327, 1.8675290264099], 14);
-	map.scrollWheelZoom.disable();
-	map.addLayer(L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors');
+	map = L.map(divelement).setView([56.9648487562327, 1.8675290264099], 14);
+	map.addLayer(L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}));
 	
 	
 	geojson = L.geoJson(null,{onEachFeature: this.onEachFeature, style : this.style}).addTo(map);
@@ -12,7 +11,9 @@ function Cloud(divelement) {
 	drawnItems = new L.FeatureGroup();
 	map.addLayer(drawnItems);
 	
+	map.on('layeradd', function(e) {
 	
+	});
 	
 	drawControl = new L.Control.Draw({
 			edit: { 
@@ -43,129 +44,48 @@ function Cloud(divelement) {
 		});
 	
 }
-	
 
-	
-	
-	K.onEachFeature = function(feature, layer) {
+	Cloud.prototype.addMapObject = function(item, list) {
 		
-		layer.on({
-			mouseover: K.highlightFeature,
-			mouseout: K.resetHighlight,
-			click: K.zoomToFeature
+		this.addGeoJson(item);
+		this.addToList(list, item.props.name, item.props.dbid);
+	}
+	
+	Cloud.prototype.addGeoJson = function(jsonobject) {	
+		geojson.addData(jsonobject);
+	}
+	
+	function getLeafletObject(dbid) {
+		geojson.eachLayer(function (layer) {
+			if (getLeafletDbId(layer) == dbid) {
+				layer.setStyle({
+					weight: 6,
+					fillColor: '#333333',
+					color: '#333333',
+					fillOpacity: 0.7
+				});
+				map.panTo(layer.getBounds().getCenter(), {animate : true, duration: 0.5});
+			}
+			
 		});
 		
-	}
-	
-	
-	K.highlightFeature = function(e) {
-		K.setActivePolygon(e);
-		var layer = e.target;
-		switch(layer.feature.geometry.type) {
-			case 'Polygon':
-				layer.setStyle({
-					weight: 1,
-					fillColor: "#0A0AD1",
-					color: "#3366CC",
-					fillOpacity: 0.3
-				});
-			break;
-			
-			case 'Point':
-				layer.setStyle({
-				weight: 4,
-				fillColor: "#0A0AD1",
-				color: "#3366CC",
-				fillOpacity: 0.7
-			});
-			break;
-			
-			
-		}
 		
-
-		if (!L.Browser.ie && !L.Browser.opera) {
-			layer.bringToFront();
-		}
 	}
 
-	
-	K.resetHighlight = function(e) {
-		K.geoJsonLayer.resetStyle(e.target);
-		K.activePolygon = '';
+	function getLeafletDbId(leafletobj) {
+		return leafletobj.feature.geometry.props.dbid;
 	}
 	
-	K.setActivePolygon = function(e) {
-		K.activePolygon = e.target;
-		console.log('Active polygon:');
-		console.log(e);
-	}
 	
-	K.getActivePolygon = function() {
-		return K.activePolygon;
-	}
-	
+	Cloud.prototype.addToList = function(listdiv, name, dbid) {
+		var anchor = document.createElement("a");
+		anchor.className+=" list-group-item";
+		anchor.innerHTML = name;
+		anchor.dbid = dbid;
+			anchor.onclick = function() {getLeafletObject(dbid)};
+		listdiv.append(anchor);
 
-	K.style = function(feature) {
-		switch(feature.geometry.type) {
-			case 'Polygon':
-				return {
-					fillColor: "#2233dd",
-					weight: 1,
-					opacity: 1,
-					color: "#2233dd",
-					fillOpacity: 0.3
-				};
-			break;
-			
-			case 'Point':
-				return {
-					fillColor: "#2233dd",
-					weight: 1,
-					opacity: 0.8,
-					color: "#2233dd",
-					fillOpacity: 0.9
-				};
-			break;
-		}
-	}
-	
-	
-	K.zoomToFeature = function(e) {
-		K.getMap().fitBounds(e.target.getBounds());
-	}
-	
-	K.startViewer = function(outline, id, option, extra) {
-		if(outline != null) {
-			console.log(extra);
-			open("viewer.html?outline="+outline+"&id="+id+"&option="+option+"&extra="+extra);
-		} else {
-			window.alert("No point cloud selected");
-		}
-	}
-	
-    K.toWKT = function(layer) {
-		var lng, lat, coords = [];
-		
-		if (layer instanceof L.Polygon || layer instanceof L.Polyline ) {
-			var latlngs = layer.getLatLngs();
-			for (var i = 0; i < latlngs.length; i++) {
-				latlngs[i]
-				coords.push(latlngs[i].lng + " " + latlngs[i].lat);
-				if (i === 0) {
-					lng = latlngs[i].lng;
-					lat = latlngs[i].lat;
-				}
-			};
-			if (layer instanceof L.Polygon) {
-				return "POLYGON((" + coords.join(",") + "," + lng + " " + lat + "))";
-			} else if (layer instanceof L.Polyline) {
-				return "LINESTRING(" + coords.join(",") + ")";
-			}
-		} else if (layer instanceof L.Circle) {
-			return "ST_MakePoint(" + layer.getLatLng().lng + "," + layer.getLatLng().lat + ")";
-		} else if (layer instanceof L.Marker) {
-			return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
-		}
 	}
 
+    
+	

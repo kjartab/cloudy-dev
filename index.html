@@ -13,11 +13,10 @@
 
 <body>
 
-	<script src="js/kartan.js"></script>
 	<script src="js/leaflet.js"></script>
 	<script src="js/leaflet.draw.js"></script>
 	<script src="js/jquery.min.js"></script>
-	<script src="js/langeland.js"></script>
+	<script src="js/cloudy.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	
 	<div id="header" class="navbar-default navbar-fixed-top">
@@ -52,21 +51,25 @@
 		$('#map').css('height', h-offsetTop);
 	}).resize();
 	
-	K.addMap('map');
-	K.addGeoJsonLayer();
+	cloudy = new Cloud('map');
+	
 	
 	$.getJSON('scripts/gettable.php', function (data) {
 		
-		var list = document.getElementById('resultlist');
+		var list = $("#resultlist");
 		
 		for (var i=0; i<data.length; i++) {
-			K.addData(data[i]);
-			list.innerHTML = list.innerHTML + ' <li><a onclick="clickItem(' + data[i][0] + ');">'+	data[i][1] + '</a></li>';
-
+			var item = JSON.parse(data[i][3]);
+			item.props = { 
+				name : data[i][1],
+				dbid : data[i][0]
+			};
+			
+			cloudy.addMapObject(item, list);
 		}
 		
 	});
-	
+	/*
 	$.getJSON('scripts/getsubsea.php', function (data) {
 		
 		var list = document.getElementById('resultlist');
@@ -91,7 +94,6 @@
 		
 	});
 	
-	/*
 	$.getJSON('scripts/getbalder.php', function (data) {
 		
 		var list = document.getElementById('resultlist');
@@ -103,7 +105,6 @@
 		}
 		
 	});
-	*/
 	
 	function buildParameters(id, outline) {
 		
@@ -114,6 +115,7 @@
 		return params;
 	}
 
+	*/
 	
 	</script>
 

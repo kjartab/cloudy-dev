@@ -5,3 +5,35 @@ body {
 	margin-top: 50px;
 }
 
+#header {
+	background-color: #afafaf;
+}
+
+.row{
+	
+padding-left: 0;
+padding-right: 0;
+}
+
+
+
+.list-group-item:first-child {
+border-top-left-radius: 0px;
+border-top-right-radius: 0px;
+}
+
+.list-group-item:last-child {
+border-bottom-left-radius: 0px;
+border-bottom-right-radius: 0px;
+}
+
+.col-lg-2 {
+padding-left: 0;
+padding-right: 0;
+}
+
+.col-lg-10 {
+padding-left: 0;
+padding-right: 0;
+
+}
