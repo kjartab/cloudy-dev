@@ -1,10 +1,9 @@
-// Extends Leaflet and adds functionality for map-dom interaction
+
 function Cloud(mapdivelement) {
 
 	version: '0.1',
 	map = L.map(mapdivelement).setView([56.9648487562327, 1.8675290264099], 8);
 	map.addLayer(L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}));
-	
 	
 	geojson = L.geoJson(null,{onEachFeature: this.onEachFeature, style : this.style}).addTo(map);
 	
@@ -43,6 +42,15 @@ function Cloud(mapdivelement) {
 			map.addLayer(layer);
 		});
 	
+}
+
+function style() {
+	return {	
+		weight: 6,
+		fillColor: '#333333',
+		color: '#333333',
+		fillOpacity: 0.7
+	}
 }
 
 function getCloud() {
@@ -167,5 +175,40 @@ Cloud.prototype.highlightFeature = function(e) {
 
 		if (!L.Browser.ie && !L.Browser.opera) {
 			layer.bringToFront();
+		}
+	}
+
+	
+	Cloud.prototype.startViewer = function(outline, id, option, extra) {
+		if(outline != null) {
+			console.log(extra);
+			open("viewer.html?outline="+outline+"&id="+id+"&option="+option+"&extra="+extra);
+		} else {
+			window.alert("No point cloud selected");
+		}
+	}
+	
+    Cloud.prototype.toWKT = function(layer) {
+		var lng, lat, coords = [];
+		
+		if (layer instanceof L.Polygon || layer instanceof L.Polyline ) {
+			var latlngs = layer.getLatLngs();
+			for (var i = 0; i < latlngs.length; i++) {
+				latlngs[i]
+				coords.push(latlngs[i].lng + " " + latlngs[i].lat);
+				if (i === 0) {
+					lng = latlngs[i].lng;
+					lat = latlngs[i].lat;
+				}
+			};
+			if (layer instanceof L.Polygon) {
+				return "POLYGON((" + coords.join(",") + "," + lng + " " + lat + "))";
+			} else if (layer instanceof L.Polyline) {
+				return "LINESTRING(" + coords.join(",") + ")";
+			}
+		} else if (layer instanceof L.Circle) {
+			return "ST_MakePoint(" + layer.getLatLng().lng + "," + layer.getLatLng().lat + ")";
+		} else if (layer instanceof L.Marker) {
+			return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
 		}
 	}
