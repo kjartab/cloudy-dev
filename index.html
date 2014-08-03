@@ -45,78 +45,37 @@
 	
 	</div>
 
-	<script> 
+
+
+
+
+
+
+
+<script> 
+
 	$(window).resize(function () {
 		var h = $(window).height(), offsetTop = 50;
 		$('#map').css('height', h-offsetTop);
 	}).resize();
+
 	
-	cloudy = new Cloud('map');
-	
-	
+	map = L.map('map').setView([56.9648487562327, 1.8675290264099], 8);
+	map.addLayer(L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}));
+
+	cloudy = new Cloud(map);
+
+	var activePolygon = null;
+
+
+
 	$.getJSON('scripts/gettable.php', function (data) {
-		
-		var list = $("#resultlist");
-		
-		for (var i=0; i<data.length; i++) {
-			var item = JSON.parse(data[i][3]);
-			item.props = { 
-				name : data[i][1],
-				dbid : data[i][0]
-			};
-			
-			cloudy.addMapObject(item, list);
-		}
+		console.log(data);
+		map.geojson = L.geoJson(JSON.parse(data[0][2]), {onEachFeature : onEachFeature, style: style}).addTo(map);
 		
 	});
-	/*
-	$.getJSON('scripts/getsubsea.php', function (data) {
-		
-		var list = document.getElementById('resultlist');
-		
-		for (var i=0; i<data.length; i++) {
-			K.addData(data[i]);
-			list.innerHTML = list.innerHTML + ' <li><a onclick="clickItem(' + data[i][0] + ');">'+	data[i][1] + '</a></li>';
 
-		}
-		
-	});
-	
-	$.getJSON('scripts/getrigs.php', function (data) {
-		
-		var list = document.getElementById('resultlist');
-		
-		for (var i=0; i<data.length; i++) {
-			K.addData(data[i]);
-			list.innerHTML = list.innerHTML + ' <li><a onclick="clickItem(' + data[i][0] + ');">'+	data[i][1] + '</a></li>';
 
-		}
-		
-	});
-	
-	$.getJSON('scripts/getbalder.php', function (data) {
-		
-		var list = document.getElementById('resultlist');
-		
-		for (var i=0; i<data.length; i++) {
-			K.addData(data[i]);
-			list.innerHTML = list.innerHTML + ' <li><a onclick="clickItem(' + data[i][0] + ');">'+	data[i][1] + '</a></li>';
-
-		}
-		
-	});
-	
-	function buildParameters(id, outline) {
-		
-		var params = '';
-		params += 'id='+id;
-		params += '&outline='+outline;
-		
-		return params;
-	}
-
-	*/
-	
 	</script>
 
 

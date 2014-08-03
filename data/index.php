@@ -1,11 +1,18 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', TRUE);
+ini_set('display_startup_errors', TRUE);
+	
+ini_set("memory_limit","2048M");
+ini_set('max_execution_time', 300); //300 seconds = 5 minutes
 require_once('includes/api.lib.php');
 require_once('includes/DatabaseHelper.php');
 require_once('includes/DatabaseRestricted.php');
+require_once('includes/db.php');
 
 	$requestObj = new Controller();
-	$dbHelper = new DatabaseHelper();
-	$dbWriter = new DatabaseRestricted();
+	$dbHelper = new DatabaseHelper($db);
+	$dbWriter = new DatabaseRestricted($db);
 	$request = $requestObj->getRequest();
 
 		
@@ -26,43 +33,24 @@ require_once('includes/DatabaseRestricted.php');
 					switch($request[3]) {
 					
 						// ------------- Handle all geometry queries ------------- 
-						case 'spatial':
-							if (count($request)==5 OR (count($request)==6 AND $request[5] == null)) {	
-	
-								$res = $dbHelper->getTable($request[4]);
-							} else if (count($request)==6 AND is_numeric($request[5])) {
-							
-								$res = $dbHelper->getRecordFromTable($request[4],$request[5]);
-							} else {
-								return Controller::respond(404);
-							}
-							
-							echo $res;
-							
-							break;
-							
-							
-							
-							
-						// ------------- Handle the spatiotemporal queries ------------- 
-						case 'pointclouds':
-							
-							$res = $dbHelper->getPointClouds();
-							
+						case 'pointcloud':	
+							$res = $dbHelper->getPoints($data['outline'],$data['dataset']);
 							echo $res;
 							break;
 							
-						
-							
-						case 'points':
 							
 							
+							
+						case 'pointcloudmeta':
+							$res = $dbHelper->getPointCloudMeta($data['outline'],$data['dataset']);
+							echo $res;
+							break;
+							
+							
+						break;	
 					}
-				} else {
-					header("Location: /cloudy-dev/data/");
-					die();
-					
 				} 
+				
 				
 				
 				if (!$res) {
@@ -71,11 +59,6 @@ require_once('includes/DatabaseRestricted.php');
 				break;
 				
 			case 'post':
-				$dat = $_POST["data"];
-				// Ensure login credentials are correct
-					$dbWriter->connect();
-					$dbWriter->insertTrackingPosition($dat)	;
-					Controller::respond(200);
 			
 				break;
 				

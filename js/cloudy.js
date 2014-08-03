@@ -1,28 +1,24 @@
 
-function Cloud(mapdivelement) {
+function Cloud(map) {
 
-	version: '0.1',
-	map = L.map(mapdivelement).setView([56.9648487562327, 1.8675290264099], 8);
-	map.addLayer(L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}));
+	_map = map;
 	
-	geojson = L.geoJson(null,{onEachFeature: this.onEachFeature, style : this.style}).addTo(map);
+	_drawnItems = new L.FeatureGroup();
+	_map.addLayer(_drawnItems);
 	
-	drawnItems = new L.FeatureGroup();
-	map.addLayer(drawnItems);
-	
-	map.on('layeradd', function(e) {
-	
+	_map.on('layeradd', function(e) {
+		
 	});
 	
-	drawControl = new L.Control.Draw({
+	_drawControl = new L.Control.Draw({
 			edit: { 
-				featureGroup: drawnItems
+				featureGroup: _drawnItems
 			},
 			position: 'bottomright'
 		});
-	map.addControl(drawControl);
+	_map.addControl(_drawControl);
 	
-	map.on('draw:created', function (e) {
+	_map.on('draw:created', function (e) {
 			var type = e.layerType,
 				layer = e.layer;
 
@@ -31,6 +27,7 @@ function Cloud(mapdivelement) {
 			}
 			
 			if (type === 'rectangle' || type === 'polygon') {
+
 			//	K.startViewer(K.toWKT(e.layer),-1,'polygon',-1);
 			}
 			
@@ -38,8 +35,9 @@ function Cloud(mapdivelement) {
 			//	K.startViewer(K.toWKT(e.layer),-1,'circle',layer._mRadius);
 				
 			}
-			
-			map.addLayer(layer);
+			startViewer(toWKT(layer),'dklidar');
+
+			_map.addLayer(layer);
 		});
 	
 }
@@ -57,19 +55,8 @@ function getCloud() {
 	return cloudy;
 }
 
-Cloud.prototype.addMapObject = function(item, list) {
-	
-	this.addGeoJson(item);
-	this.addToList(list, item.props.name, item.props.dbid);
-}
 
-Cloud.prototype.addGeoJson = function(jsonobject) {	
-	geojson.addData(jsonobject, {onEachFeature: getCloud().onEachFeature, style : getCloud().style});
-}
-
-
-
-Cloud.prototype.addToList = function(listdiv, name, dbid) {
+function addToList(listdiv, name, dbid) {
 	
 	var anchor = document.createElement("a");
 	anchor.className+=" list-group-item";
@@ -80,31 +67,11 @@ Cloud.prototype.addToList = function(listdiv, name, dbid) {
 }
 
 
-
-Cloud.prototype.getLeafletObject = function(dbid) {
-	geojson.eachLayer(function (layer) {
-		if (getCloud().getLeafletDbId(layer) == dbid) {
-			layer.setStyle({
-				weight: 6,
-				fillColor: '#333333',
-				color: '#333333',
-				fillOpacity: 0.7
-			});
-			map.panTo(layer.getBounds().getCenter(), {animate : true, duration: 0.5});
-		}
-	});
-}
-
-
-Cloud.prototype.getLeafletDbId = function(leafletobj) {
-	return leafletobj.feature.geometry.props.dbid;
-}
-
-Cloud.prototype.style = function(feature) {
+function style(feature) {
 		switch(feature.geometry.type) {
 			case 'Polygon':
 				return {
-					fillColor: "#2233dd",
+					fillColor: "#333333",
 					weight: 1,
 					opacity: 1,
 					color: "#2233dd",
@@ -125,29 +92,29 @@ Cloud.prototype.style = function(feature) {
 	}
 	
 
-Cloud.prototype.onEachFeature = function(feature, layer) {
+function onEachFeature(feature, layer) {
 		
 		layer.on({
-			mouseover: getCloud().highlightFeature,
-			mouseout: getCloud().resetHighlight,
-			click: getCloud().zoomToFeature
+			mouseover: highlightFeature,
+			mouseout: resetHighlight,
+			click: zoomToFeature
 		});
 		
 	}
 
-Cloud.prototype.zoomToFeature = function() {
-	getMap().fitBounds(e.target.getBounds());
+function zoomToFeature(e) {
+	map.fitBounds(e.target.getBounds());
 }
 
-Cloud.prototype.resetHighlight = function(e) {
-		geojson.resetStyle(e.target);
-		activePolygon = '';
+function resetHighlight(e) {
+		map.geojson.resetStyle(e.target);
 	}
 
 
 
-Cloud.prototype.highlightFeature = function(e) {
-
+function highlightFeature(e) {
+	activePolygon = e.target.feature;
+	console.log(activePolygon);
 
 		var layer = e.target;
 		switch(layer.feature.geometry.type) {
@@ -179,16 +146,15 @@ Cloud.prototype.highlightFeature = function(e) {
 	}
 
 	
-	Cloud.prototype.startViewer = function(outline, id, option, extra) {
+function startViewer(outline, dataset) {
 		if(outline != null) {
-			console.log(extra);
-			open("viewer.html?outline="+outline+"&id="+id+"&option="+option+"&extra="+extra);
+			open("viewer.html?outline="+outline+"&dataset="+dataset);
 		} else {
 			window.alert("No point cloud selected");
 		}
 	}
 	
-    Cloud.prototype.toWKT = function(layer) {
+function toWKT(layer) {
 		var lng, lat, coords = [];
 		
 		if (layer instanceof L.Polygon || layer instanceof L.Polyline ) {

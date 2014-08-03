@@ -11,22 +11,18 @@ Class DatabaseHelper {
 	private $dbresult;
 	
 	
-    public function __construct() {
-		$this->host = 'localhost';
-		$this->port = '5432';
-		$this->dbname = 'langeland';
-		$this->user = 'langeland';
-		$this->password = 'lillehammerol';
+    public function __construct($db) {
+		$this->dbArray = $db;
 	}
 	
 	public function connect() {	
 		if ($this->dbconn == null) {
-			$this->dbconn = pg_connect("host=localhost port=5432 dbname=lidardb user=postgres password=kjartan");
+			$this->dbconn = pg_connect($this->dbArray['connectionString']);	
 		} else {
 			echo 'connection already established';	
 		}
 	}
-
+	
 	
 	public function runQuery($queryText) {
 		$dbresult;
@@ -99,8 +95,40 @@ Class DatabaseHelper {
 		}
 		return $this->transformResult($dbresult);
 	}
-	
-}
 
+	public function getPoints($outline, $dataset) {
+		$dbresult;
+		if ($this->dbconn) {
+			$dbresult = @pg_query("
+						WITH pts AS (with pcs as (
+								SELECT paid FROM ".$dataset."_indexlayer where ST_Intersects(patchgeom, ST_SetSRID(ST_Transform(ST_SetSRID(ST_GeomFromText('".urldecode($outline)."'),4326),32632),32632)))
+							SELECT PC_Explode(pa) pt from ".$dataset.", pcs where id=pcs.paid)
+						SELECT 1, ST_X(pt::geometry) x, ST_Y(pt::geometry) y, ST_Z(pt::geometry) z, 65536 , 65536 , 65536, 1, 1 FROM pts where  ST_Intersects(pt::geometry, ST_SetSRID(ST_Transform(ST_SetSRID(ST_GeomFromText('" .urldecode($outline). "'),4326),32632),32632));"
+						);
+		if ($dbresult === false) {
+				return;
+			}
+		}
+		return $this->transformResult($dbresult);
+	}
+
+
+
+
+	public function getPointCloudMeta($outline, $dataset) {
+		$dbresult;
+		if ($this->dbconn) {
+			$dbresult = @pg_query("WITH patches as (
+									SELECT paid FROM dklidar_indexlayer where ST_Intersects(patchgeom, ST_SetSRID(ST_Transform(ST_SetSRID(ST_GeomFromText('".$outline."'),4326),32632),32632))
+									)
+									SELECT SUM(PC_NumPoints(pa)) from dklidar, patches where paid=id;");
+		if ($dbresult === false) {
+				return;
+			}
+		}
+		return $this->transformResult($dbresult);
+	}
+
+}
 
 ?>

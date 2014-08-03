@@ -53,10 +53,7 @@
 	}
 	
 	var outline = getUrlVars()["outline"];
-	var id = getUrlVars()["id"];
-	var option = getUrlVars()["option"];
-	var extra = getUrlVars()["extra"];
-
+	var dataset = getUrlVars()["dataset"];
 	$(window).resize(function () {
 				var h = $(window).height(),
 					offsetTop = 50; // Calculate the top offset
@@ -70,7 +67,7 @@
 				$.ajax({
 					 async: true,
 					 type: 'GET',
-					 url: 'scripts/getpartofhelsinki.php?outline='+outline+'&id='+id+'&option='+option+"&extra="+extra,
+					 url: 'data/pointcloud/?outline='+outline+'&dataset='+dataset,
 					 success: function(indata) {
 						data = JSON.parse(indata);
 						k = loadPointData(data);
