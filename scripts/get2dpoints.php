@@ -15,10 +15,12 @@ $result = null;
 if(!$dbconn) die('coud not connect to pgsql');
 
 	$result = pg_query($dbconn, 
-		"WITH pts AS (SELECT PC_Explode(pa) AS pt FROM laserdata limit 500000)
-        SELECT 1, ST_X(pt::geometry) x, ST_Y(pt::geometry) y, ST_Z(pt::geometry) z, 65535/PC_Get(pt::pcpoint, 'Classification') , 65535/PC_Get(pt::pcpoint, 'Classification') , 65535, 1, 1 FROM pts;");
+		/*"WITH pts AS (SELECT PC_Explode(pa) AS pt FROM laserdata limit 10000)
+        SELECT ST_X(pt::geometry) x, ST_Y(pt::geometry) y,  ST_Z(pt::geometry) z,  ST_Z(pt::geometry), PC_Get(pt,'Classification') FROM pts;");
+		*/
+        
+        "SELECT PC_PatchAvg(pa,'X'),PC_PatchAvg(pa,'Y'), PC_PatchAvg(pa,'Z'),1  AS pt FROM laserdata limit 10000;");
 		
-
 
 	if (!$result) {
 	  echo "An error occured.\n";

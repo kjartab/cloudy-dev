@@ -10,7 +10,7 @@
 				var geometry = new THREE.Geometry();
 				
 				geometry.colors = [];
-				var colorrange=255;
+				var colorrange=65535;
 				var x,y,z;
 				var vertex = new THREE.Vector3();
 				for (i = 0; i < data.length; i++ ) {

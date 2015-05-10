@@ -1,0 +1,138 @@
+<html>
+<head>
+	<title>Cloudy</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="stylesheet" href="css/leaflet.css"/>
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/isas.css">
+	
+</head>
+
+<body>
+
+	<script src="js/three.js"></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/TrackballControls.js"></script>
+	<script src="js/pointloader.js"></script>
+	<script src="js/leaflet.js"></script>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+
+	<div id="header" class="navbar-default navbar-fixed-top">
+		<div class="navbar-header col-md-2" >
+			<a class="navbar-brand" href="#">Cloudy-dev</a>
+		</div>
+	</div>
+	
+	<div id="wrapper">
+		<div id="main-wrapper" class="col-md-2">
+			<ul class="nav navbar-nav"></ul>
+		</div>
+	<div id="main-wrapper" class="col-md-10">
+		<div id="pointview"></div>
+	</div>
+	</div>
+
+
+  <script>
+
+	function print() {
+		console.log(camera);
+		console.log(scene.children);
+		controls.center
+	}
+	
+	function getUrlVars() {
+		var vars = {};
+		var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+			vars[key] = value;
+		});
+		return vars;
+	}
+	
+	var outline = getUrlVars()["outline"];
+	var id = getUrlVars()["id"];
+	var option = getUrlVars()["option"];
+	var extra = getUrlVars()["extra"];
+
+	$(window).resize(function () {
+				var h = $(window).height(),
+					offsetTop = 50; // Calculate the top offset
+				$('pointview').css('height', $(window).height() - offsetTop);
+			}).resize();
+  
+    // Set up the scene, camera, and renderer as global variables.
+    var scene, camera, renderer;
+	var k; 
+	function load() {
+				$.ajax({
+					 async: true,
+					 type: 'GET',
+					 url: 'scripts/getpartofhelsinki.php?outline='+outline+'&id='+id+'&option='+option+"&extra="+extra,
+					 success: function(indata) {
+						data = JSON.parse(indata);
+						k = loadPointData(data);
+						init();
+						animate();
+					 }
+				});
+			}	
+
+    var axes = new THREE.AxisHelper(100);
+	
+    function init() {
+	
+		scene = new THREE.Scene();
+		var WIDTH = window.innerWidth,
+			HEIGHT = window.innerHeight;
+
+		renderer = new THREE.WebGLRenderer({antialias:true});
+		renderer.setSize(WIDTH, HEIGHT);
+		document.body.appendChild(renderer.domElement);
+
+		camera = new THREE.PerspectiveCamera(45, WIDTH / HEIGHT, 0.1, 20000);
+		camera.position.set(200,-20,400);
+		
+		scene.add(camera);
+
+		container = document.getElementById( 'pointview' );
+		container.appendChild( renderer.domElement );
+	
+	
+		window.addEventListener('resize', function() {
+			var WIDTH = window.innerWidth,
+				HEIGHT = window.innerHeight;
+			renderer.setSize(WIDTH, HEIGHT);
+			camera.aspect = WIDTH / HEIGHT;
+			camera.updateProjectionMatrix();
+		});
+
+	  
+		renderer.setClearColorHex(0x333F47, 1);
+
+	  
+			var light = new THREE.PointLight(0xffffff);
+			light.position.set(-100,200,100);
+			scene.add(light);
+			scene.add(k);
+			scene.add(axes);
+			controls = new THREE.TrackballControls(camera, renderer.domElement);
+
+    }
+
+    function animate() {
+
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+      controls.update();
+
+    }
+
+	load();
+  </script>
+
+
+</body>
+</html>

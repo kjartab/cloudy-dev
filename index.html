@@ -16,7 +16,7 @@
 	<script src="js/kartan.js"></script>
 	<script src="js/leaflet.js"></script>
 	<script src="js/leaflet.draw.js"></script>
-	<script src="js/jquery.min.js"></script>
+	<script src="js/jquery.min.js"></script>    
 	<script src="js/langeland.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	
@@ -55,55 +55,15 @@
 	K.addMap('map');
 	K.addGeoJsonLayer();
 	
-	$.getJSON('scripts/gettable.php', function (data) {
-		
+	$.getJSON('/datapi/pointclouds/patches', function (data) {
+		console.log(data);
 		var list = document.getElementById('resultlist');
 		
 		for (var i=0; i<data.length; i++) {
 			K.addData(data[i]);
-			list.innerHTML = list.innerHTML + ' <li><a onclick="clickItem(' + data[i][0] + ');">'+	data[i][1] + '</a></li>';
-
 		}
 		
 	});
-	
-	$.getJSON('scripts/getsubsea.php', function (data) {
-		
-		var list = document.getElementById('resultlist');
-		
-		for (var i=0; i<data.length; i++) {
-			K.addData(data[i]);
-			list.innerHTML = list.innerHTML + ' <li><a onclick="clickItem(' + data[i][0] + ');">'+	data[i][1] + '</a></li>';
-
-		}
-		
-	});
-	
-	$.getJSON('scripts/getrigs.php', function (data) {
-		
-		var list = document.getElementById('resultlist');
-		
-		for (var i=0; i<data.length; i++) {
-			K.addData(data[i]);
-			list.innerHTML = list.innerHTML + ' <li><a onclick="clickItem(' + data[i][0] + ');">'+	data[i][1] + '</a></li>';
-
-		}
-		
-	});
-	
-	/*
-	$.getJSON('scripts/getbalder.php', function (data) {
-		
-		var list = document.getElementById('resultlist');
-		
-		for (var i=0; i<data.length; i++) {
-			K.addData(data[i]);
-			list.innerHTML = list.innerHTML + ' <li><a onclick="clickItem(' + data[i][0] + ');">'+	data[i][1] + '</a></li>';
-
-		}
-		
-	});
-	*/
 	
 	function buildParameters(id, outline) {
 		

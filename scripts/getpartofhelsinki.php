@@ -2,7 +2,7 @@
 
 session_start();
 	
-ini_set("memory_limit","2048M");
+ini_set("memory_limit","4096M");
 ini_set('max_execution_time', 300); //300 seconds = 5 minutes
 
 function say_hello() {
@@ -14,7 +14,7 @@ $id = $_GET["id"];
 $option = $_GET["option"];
 $extra = $_GET["extra"];
 
-$dbconn = pg_connect("host=localhost port=5433 dbname=mbe user=postgres password=kjartan");
+$dbconn = pg_connect("host=localhost port=5432 dbname=melhus user=postgres password=postgres");
 
 $result = null;
 
@@ -24,13 +24,15 @@ if(!$dbconn) die('coud not connect to pgsql');
 	switch($option) {
 	
 	case 'polygon':
+    
 		$result = pg_query($dbconn, 
 			"WITH pts AS (with pcs as (
-					SELECT id ids FROM helsinki where PC_Intersects(pa, ST_SetSRID(ST_Transform(ST_SetSRID(ST_GeomFromText('" .$outline. "'),4326),3067),3067))
+					SELECT id ids FROM laserdata where PC_Intersects(pa, ST_SetSRID(ST_Transform(ST_SetSRID(ST_GeomFromText('" .$outline. "'),4326),25832),25832))
 				)
-				SELECT PC_explode(pa) pt from helsinki, pcs where id=pcs.ids
+				SELECT PC_explode(pa) pt from laserdata, pcs where id=pcs.ids
 			)
-			SELECT 1, ST_X(pt::geometry) x, ST_Y(pt::geometry) y, ST_Z(pt::geometry)*-1 z, 65536 , 65536 , 65536, 1, 1 FROM pts where  ST_Intersects(pt::geometry, ST_SetSRID(ST_Transform(ST_SetSRID(ST_GeomFromText('" .$outline. "'),4326),3067),3067));");
+			SELECT 1, ST_X(pt::geometry) x, ST_Y(pt::geometry) y, ST_Z(pt::geometry) z, 65536 , 65536 , 65536, 1, 1 FROM pts where  ST_Intersects(pt::geometry, ST_SetSRID(ST_Transform(ST_SetSRID(ST_GeomFromText('" .$outline. "'),4326),25832),25832));");
+            
 		
 	break;
 	case 'circle': 

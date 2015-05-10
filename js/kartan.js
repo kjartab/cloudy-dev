@@ -6,12 +6,16 @@ var K = {
 	
 	// Constructs a map and binds it to the incoming DOM object, divelement
 	K.addMap = function(divelement) {
-		K.map = L.map(divelement).setView([56.9648487562327, 1.8675290264099], 17);
-		
+		K.map = L.map(divelement).setView([61, 5], 12);
+		/*
 		L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-		}).addTo(K.getMap());
-		
+		}).addTo(K.getMap());*/
+		L.tileLayer('http://www.webatlas.no/maptiles/tiles/webatlas-standard-vektor/wa_grid/{z}/{x}/{y}.png', {
+            maxZoom: 20,
+            zIndex: 0
+        }).addTo(K.getMap());
+        
 		K.drawnItems = new L.FeatureGroup();
 		K.getMap().addLayer(K.drawnItems);
 
@@ -60,7 +64,7 @@ var K = {
 	
 	K.addData = function(data) {
 		
-		K.geoJsonLayer.addData(JSON.parse(data[3]));	
+		K.geoJsonLayer.addData(JSON.parse(data[1]));	
 		return K.geoJsonLayer;
 	}
 	
