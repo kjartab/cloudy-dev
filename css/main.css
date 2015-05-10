@@ -5,3 +5,6 @@ body {
 	margin-top: 50px;
 }
 
+#map {
+height: 100%;
+}
