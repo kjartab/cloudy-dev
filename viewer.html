@@ -19,6 +19,8 @@
 	<script src="js/leaflet.js"></script>
 	<script src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
+	<script src="config.js"></script>
+
 
 	<div id="header" class="navbar-default navbar-fixed-top">
 		<div class="navbar-header col-md-2" >
@@ -43,6 +45,7 @@
 		console.log(scene.children);
 		controls.center
 	}
+    
 	
 	function getUrlVars() {
 		var vars = {};
@@ -69,8 +72,8 @@
 	function load() {
 				$.ajax({
 					 async: true,
+					 url: config.datapi+'/pcpoints/?outline='+outline,
 					 type: 'GET',
-					 url: 'scripts/getpartofhelsinki.php?outline='+outline+'&id='+id+'&option='+option+"&extra="+extra,
 					 success: function(indata) {
 						data = JSON.parse(indata);
 						k = loadPointData(data);
