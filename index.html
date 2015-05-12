@@ -19,6 +19,7 @@
 	<script src="js/jquery.min.js"></script>    
 	<script src="js/langeland.js"></script>
 	<script src="js/bootstrap.min.js"></script>
+	<script src="config.js"></script>
 	
 	<div id="header" class="navbar-default navbar-fixed-top">
 		<div class="navbar-header col-md-2" >
@@ -95,12 +96,14 @@
     
     var  geoJsonLayer =  L.geoJson(null).addTo(map);
 	
-    
+    var request; 
     map.on('moveend', function(e) {
         console.log(toWKT(createPolygonFromBounds(map.getBounds())));
-        $.getJSON('/datapi/pointclouds/patchesbbox/?outline='+toWKT(createPolygonFromBounds(map.getBounds())), function (data) {
+        
+        
+        request = $.getJSON('http://10.0.0.249/datapi/pointclouds/patchesbbox/?outline='+toWKT(createPolygonFromBounds(map.getBounds())), function (data) {
 		
-            geoJsonLayer.clearLayers();
+        geoJsonLayer.clearLayers();
 		for (var i=0; i<data.length; i++) {
            geoJsonLayer.addData(JSON.parse(data[i][1]));
 //            geoJsonLayer.addData(JSON.parse(data[1]));	
