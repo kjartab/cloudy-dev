@@ -1,84 +1,172 @@
-<html>
-<head>
-	<title>Cloudy</title>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	
-	<link rel="stylesheet" href="css/leaflet.css"/>
-	<link rel="stylesheet" href="css/leaflet.draw.css"/>
-	<link rel="stylesheet" href="css/bootstrap.css">
-	<link rel="stylesheet" href="css/main.css">
+	<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../assets/ico/favicon.png">
+
+    <title>Terrain</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="scripts/lib/leaflet/dist/leaflet.css" rel="stylesheet">
+    <link href="scripts/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/cloudy.css" rel="stylesheet">
+	<link href="scripts/lib/leaflet-draw/dist/leaflet.draw.css" rel="stylesheet" />
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 	
 </head>
-
+  
 <body>
-
-	<script src="js/kartan.js"></script>
-	<script src="js/leaflet.js"></script>
-	<script src="js/leaflet.draw.js"></script>
-	<script src="js/jquery.min.js"></script>    
-	<script src="js/langeland.js"></script>
-	<script src="js/bootstrap.min.js"></script>
+  
+    <script src="scripts/lib/jquery/dist/jquery.min.js"></script>
+    <script src="scripts/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="scripts/lib/leaflet/dist/leaflet.js"></script>
+	<script src="scripts/lib/leaflet-draw/dist/leaflet.draw.js"></script>
+	<script src="scripts/src/select.js"></script>
 	<script src="config.js"></script>
+  
 	
-	<div id="header" class="navbar-default navbar-fixed-top">
-		<div class="navbar-header col-md-2" >
-			<a class="navbar-brand" href="#">Cloudy-dev</a>
-		</div>
-		<div class="collapse navbar-collapse">
-			<ul class="nav navbar-nav">
-				<li><a href="#"></a></li>
-			</ul>
-		</div>
-	</div>
-	<div id="wrapper">
-		<div id="sidebar" class="col-lg-2">
-			<ul class="nav list-group" id="resultlist">
-			
-			</ul>
-		</div>
-	 
+<div class="wrapper">
+    <div id="map"></div>
+    
+    <div id="brand"><a href="http://www.kartan.no">Kjartan B.</a> / PointClouds</div>
+    
+    
+    <a id="action-button" href="#" title="" class="terrain-btn btn btn-dark btn-lg toggle">Select area</a>
+    
+    <div id="sidebar">
+        <a id="sidebar-close"  href="#" title="" class="terrain-btn btn btn-dark btn-lg toggle"><i class="fa fa-times"></i></a>
+    
+        <h2>Selected Area</h2>
+        <form>
+            <h3>Summary</h3>
+            
+            <p>12 patches</p>
+            <p>1200 points</p>
+            
+            
+            <div class="button-row">
+                <a id="download" title="" class="terrain-btn btn btn-dark btn-lg toggle">Download</a>
+                <a id="3dview" title="" class="terrain-btn btn btn-dark btn-lg toggle">3D View</a>
+            </div>
+        </form>
+        
+    </div>
+    
 	
-		<div id="main-wrapper" class="col-lg-10">
-			
-			<div id="map"></div>
-			
-		</div>
-	
-	</div>
+</div>
+   
+	<script>
+		
+    
+	var map = L.map('map', {zoomControl: false}).setView([55, 10], 5);
 
-	<script> 
+    
+
+    L.tileLayer('http://www.webatlas.no/maptiles/tiles/webatlas-standard-vektor/wa_grid/{z}/{x}/{y}.png', {
+        maxZoom: 30,
+        zIndex: 0
+    }).addTo(map);
+
+    
+    $actionButton = $('#action-button');
+    $sidebar = $('#sidebar');
+    $viewButton = $('#3dview');
+    $downloadButton = $('#download');
+    
+    $('#sidebar-close').on('click', function(e) {
+        $('#sidebar').fadeOut(250); 
+        $actionButton.removeClass('editing');
+        $actionButton.text('Select area');
+        select.destroy();
+    });
     
     
+    select.init(map);
+    select.drawnCallback(function(event) {
+        $sidebar.fadeIn(250); 
+        select.disable();
+    });
     
     
-    var map = L.map('map').setView([61, 5], 12);
-		L.tileLayer('http://www.webatlas.no/maptiles/tiles/webatlas-standard-vektor/wa_grid/{z}/{x}/{y}.png', {
-            maxZoom: 20,
-            zIndex: 0
-        }).addTo(map);
-        
-        
-    var drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
-    var drawControl = new L.Control.Draw({
-        edit : {
-        featureGroup : drawnItems
+    $downloadButton.on('click', function(e) {
+        e.preventDefault();
+    
+    });
+    
+    $viewButton.on('click', function(e) {
+        e.preventDefault();
+        startViewer(layerToWKT(select.getSelection()),'dtm.norge33');
+    });
+    
+    $actionButton.on('click', function(e) {
+        if (select.isEnabled()) {
+            select.disable();
+            $actionButton.removeClass('editing');
+            $actionButton.text('Select area');
+        } else {
+            $actionButton.addClass('editing');
+            select.enable();
+            $actionButton.html('<i class="fa fa-times"</i>');
         }
     });
     
-    map.addControl(drawControl);
+    function style(feature) {
+        switch(feature.geometry.type) {
+            case 'Polygon':
+                return {	
+                    fillColor: "#2233dd",
+                    weight: 1,
+                    opacity: 1,
+                    color: "#2233dd",
+                    fillOpacity: 0.3
+                };
+            break;
+            
+            case 'Point':
+                return {
+                    fillColor: "#2233dd",
+                    weight: 1,
+                    opacity: 0.8,
+                    color: "#2233dd",
+                    fillOpacity: 0.9
+                };
+            break;
+        }
+    }
+        
     
-    map.on('draw:created', function(e) {
-            var type = e.layerType;
-            var layer = e.layer;
-			if (type === 'rectangle' || type === 'polygon') {
-				startViewer(toWKT(e.layer),-1,'polygon',-1);
-			}
-			
+    
+    var  geoJsonLayer =  L.geoJson(null).addTo(map);
+	
+    var request; 
+    map.on('moveend', function(e) {
+        console.log(layerToWKT(createPolygonFromBounds(map.getBounds())));
+        if(request!= null) {
+        
+        request.abort();
+        }
+        request = $.getJSON('http://10.0.0.249/datapi/pointclouds/patchesbbox/?outline='+layerToWKT(createPolygonFromBounds(map.getBounds())), function (data) {
+            
+            geoJsonLayer.clearLayers();
+            for (var i=0; i<data.length; i++) {
+               geoJsonLayer.addData(JSON.parse(data[i][1]));
+            }
+        });
+        
     });
+    function startViewer(outline, table) {
+		if(outline != null) {
+			
+			open("visualize.html?outline="+outline+"&table="+table);
+		} else {
+			window.alert("No point cloud selected");
+		}
+	}
 
-    function createPolygonFromBounds(latLngBounds) {
+        function createPolygonFromBounds(latLngBounds) {
         var center = latLngBounds.getCenter()
         latlngs = [];
 
@@ -94,47 +182,8 @@
         return new L.polygon(latlngs);
     }
     
-    var  geoJsonLayer =  L.geoJson(null).addTo(map);
-	
-    var request; 
-    map.on('moveend', function(e) {
-        console.log(toWKT(createPolygonFromBounds(map.getBounds())));
-        
-        
-        request = $.getJSON('http://10.0.0.249/datapi/pointclouds/patchesbbox/?outline='+toWKT(createPolygonFromBounds(map.getBounds())), function (data) {
-		
-        geoJsonLayer.clearLayers();
-		for (var i=0; i<data.length; i++) {
-           geoJsonLayer.addData(JSON.parse(data[i][1]));
-//            geoJsonLayer.addData(JSON.parse(data[1]));	
-		}
-		
-	});
-        
-    });
     
-	
-	
-	function buildParameters(id, outline) {
-		
-		var params = '';
-		params += 'id='+id;
-		params += '&outline='+outline;
-		
-		return params;
-	}
-    
-    
-    function startViewer(outline, id, option, extra) {
-		if(outline != null) {
-			console.log(extra);
-			open("viewer.html?outline="+outline+"&id="+id+"&option="+option+"&extra="+extra);
-		} else {
-			window.alert("No point cloud selected");
-		}
-	}
-    
-    function toWKT(layer) {
+    function layerToWKT(layer) {
 		var lng, lat, coords = [];
 		
 		if (layer instanceof L.Polygon || layer instanceof L.Polyline ) {
@@ -158,14 +207,8 @@
 			return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
 		}
 	}
-
-	
-
-	
+			
 	</script>
 
-
 </body>
-
 </html>
-

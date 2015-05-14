@@ -15,9 +15,9 @@
 				var vertex = new THREE.Vector3();
 				for (i = 0; i < data.length; i++ ) {
 					
-					vertex.x = data[i][1];
-					vertex.y = data[i][2];
-					vertex.z = data[i][3];
+					vertex.x = data[i][0];
+					vertex.y = data[i][1];
+					vertex.z = data[i][2];
 					
 					if (i==0) {
 						max_x = min_x = Number(vertex.x);
@@ -58,15 +58,47 @@
 				for (i = 0; i < data.length; i++ ) {
 					var vertex = new THREE.Vector3();
 					
-					vertex.x = data[i][1] - min_x - (max_x-min_x)/2;
-					vertex.z = data[i][2] - min_y - (max_y-min_y)/2;
-					vertex.y = data[i][3] - min_z - (max_z-min_z)/2;
+					vertex.x = data[i][0] - min_x - (max_x-min_x)/2;
+					vertex.z = data[i][1] - min_y - (max_y-min_y)/2;
+					vertex.y = data[i][2] - min_z - (max_z-min_z)/2;
 					
 					geometry.colors[i] = new THREE.Color();
 					rgbcolors[i] = new THREE.Color();
-					
-					geometry.colors[i].setRGB(data[i][4]/colorrange,data[i][5]/colorrange,data[i][6]/colorrange);
-					rgbcolors[i].setRGB(data[i][4]/colorrange,data[i][5]/colorrange,data[i][6]/colorrange);
+                    var r,g,b;
+                    
+					 switch(Number(data[i][3])) {
+                         
+                         case 1:
+                             r = 255, g=255, b=255;
+                             break;
+                         case 2:
+                             r = 0; g=255; b=255;                         
+                             break;
+                         case 3:
+                            r = 255, g=0, b=255;
+                            break;
+                         case 4:
+                             r = 255; 
+                             g=255;
+                             b=0;
+                             break;
+                         case 5:
+                             r = 55;
+                             g=55;
+                             b=55;
+                             break;
+                         case 6:
+                             r = 255; g=0; b=0
+                             break;
+                         case 7:
+                             r = 0, g=0, b=255;
+                             break;
+                         case 8:
+                            r = 255, g=255, b=255;
+                            break;
+                     }
+					geometry.colors[i].setRGB(r,g,b);
+					rgbcolors[i].setRGB(r,g,b);
 					
 					geometry.vertices.push( vertex );
 					
