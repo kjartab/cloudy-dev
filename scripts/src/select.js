@@ -5,6 +5,7 @@
         var drawnItmes;
         var enabled = false;
         var rectangleDrawer;
+        var polygonDrawer;
         var selection; 
         var onDrawCompleteCallback;
         
@@ -13,15 +14,16 @@
             
             drawnItems = new L.FeatureGroup().addTo(map);
             rectangleDrawer = new L.Draw.Rectangle(map);
+            polygonDrawer = new L.Draw.Polygon(map);
             
             map.addLayer(drawnItems);
             map.on('draw:created', function(event) {
-                if (event.layerType === 'rectangle') {
+                if (event.layerType === 'rectangle' || event.layerType == 'polygon') {
                     if (onDrawCompleteCallback !== null) {
                         selection = event.layer;
                         drawnItems.addLayer(selection);
                         onDrawCompleteCallback(event);
-                    }
+                    }   
                 }
             });
             
@@ -36,6 +38,13 @@
             rectangleDrawer.enable();
             enabled = true;
         }
+        
+        function enablePolygon() {
+            drawnItems.clearLayers();
+            polygonDrawer.enable();
+            enabled = true;
+        }
+            
         
         function disable() {
             rectangleDrawer.disable();
@@ -62,6 +71,7 @@
             init : init,
             getSelection: getSelection,
             enable : enable,
+            enablePolygon : enablePolygon,
             disable : disable,
             destroy : clearLayers,
             isEnabled : isEnabled,

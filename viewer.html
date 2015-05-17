@@ -4,9 +4,10 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	
-	<link rel="stylesheet" href="css/leaflet.css"/>
-	<link rel="stylesheet" href="css/bootstrap.css">
-	<link rel="stylesheet" href="css/isas.css">
+    
+    <link href="scripts/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link href="css/cloudy.css" rel="stylesheet">
 	
 </head>
 
@@ -20,33 +21,75 @@
 	<script src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="config.js"></script>
+    <script type="text/javascript" src="delaunay/delaunay.js">
+    </script>
 
 
-	<div id="header" class="navbar-default navbar-fixed-top">
-		<div class="navbar-header col-md-2" >
-			<a class="navbar-brand" href="#">Cloudy-dev</a>
-		</div>
-	</div>
 	
-	<div id="wrapper">
-		<div id="main-wrapper" class="col-md-2">
-			<ul class="nav navbar-nav"></ul>
-		</div>
-	<div id="main-wrapper" class="col-md-10">
-		<div id="pointview"></div>
-	</div>
-	</div>
+<div class="wrapper">
 
+    <div id="pointview"></div>
+    <div id="brand"><a href="http://www.kartan.no">Kjartan B.</a> / PointClouds</div>
+
+
+    <a id="action-button" href="#" title="" class="terrain-btn btn btn-dark btn-lg toggle"><i class="fa fa-bars"></i></a>
+
+    <div id="sidebar">
+        <a id="sidebar-close"  href="#" title="" class="terrain-btn btn btn-dark btn-lg toggle"><i class="fa fa-times"></i></a>
+    
+        <h2>Selected Area</h2>
+        <form>
+            <h3>Summary</h3>
+            
+            <h4>Point count: </h4>
+            <p id="pointcount"></p>
+            
+            <h4>Color scheme:</h4>
+            <div class="dropdown">
+                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+            None
+            <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">None</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Height</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Intensity</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Classification</a></li>
+            </ul>
+            </div>
+            
+            
+            
+            <div class="button-row">
+                <a id="download" title="" class="terrain-btn btn btn-dark btn-lg toggle">Download</a>
+            </div>
+        </form>
+        
+    </div>
+    
+	
+</div>
 
   <script>
 
-	function print() {
-		console.log(camera);
-		console.log(scene.children);
-		controls.center
-	}
+  
+  
+    var $actionButton = $('#action-button');
+    var $sidebar = $('#sidebar').show();
+    var $sidebarClose = $('#sidebar-close');
+    
+    $actionButton.on('click', function(e) {
+            $sidebar.show();
+        
+    });
+    
+    $sidebarClose.on('click', function(e) {
+        $sidebar.fadeOut(250); 
+    });
+    
     
 	
+    $sidebar.show();
 	function getUrlVars() {
 		var vars = {};
 		var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
@@ -60,12 +103,6 @@
 	var option = getUrlVars()["option"];
 	var extra = getUrlVars()["extra"];
 
-	$(window).resize(function () {
-				var h = $(window).height(),
-					offsetTop = 50; // Calculate the top offset
-				$('pointview').css('height', $(window).height() - offsetTop);
-			}).resize();
-  
     // Set up the scene, camera, and renderer as global variables.
     var scene, camera, renderer;
 	var k; 
@@ -79,6 +116,7 @@
 						k = loadPointData(data);
 						init();
 						animate();
+                        scene.add(buildDelaunayTriangles(data));
 					 }
 				});
 			}	
@@ -120,11 +158,56 @@
 			light.position.set(-100,200,100);
 			scene.add(light);
 			scene.add(k);
-			scene.add(axes);
 			controls = new THREE.TrackballControls(camera, renderer.domElement);
 
     }
+    
+    
+    function buildDelaunayTriangles(vertices) {
+    
+        var geometry = new THREE.Geometry();
+        
+        var count=0;
+        var verts= new Array();
+        var x,y,z;
+        for (var i=0; i<vertices.length; i++) {
+        if(data[i][3] == 3) {
+        x = Number(vertices[i][0]) - 726160.5;
+        y = Number(vertices[i][1]) - 6177076.83;
+        z = Number(vertices[i][2]) - 2.9;
+                geometry.vertices.push(new THREE.Vector3(x,y,z));
+                verts[count] = [x,y,z];
+                count++;
+                }
+        }
+        $('#pointcount').text(vertices.length);
+        var triangles = Delaunay.triangulate(verts);
+        console.log(verts);
 
+        for(var i = triangles.length; i; ) {
+
+            --i; 
+            var first = triangles[i];
+
+            --i; 
+            var second = triangles[i];
+
+            --i; 
+            var third = triangles[i];
+
+            geometry.faces.push(new THREE.Face3(first, second, third));
+        }
+      
+		geometry.computeFaceNormals();
+		geometry.computeVertexNormals();
+      
+        var material = new THREE.MeshLambertMaterial({  color: 0xefefef, shading: THREE.SmoothShading})
+        
+        var plane = new THREE.Mesh(geometry, material);
+         return plane;
+      }
+    
+    
     function animate() {
 
       requestAnimationFrame(animate);

@@ -97,7 +97,7 @@
                             r = 255, g=255, b=255;
                             break;
                      }
-					geometry.colors[i].setRGB(r,g,b);
+					geometry.colors[i].setRGB(255,255,255);
 					rgbcolors[i].setRGB(r,g,b);
 					
 					geometry.vertices.push( vertex );

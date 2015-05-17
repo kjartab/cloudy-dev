@@ -12,9 +12,9 @@
     <!-- Bootstrap core CSS -->
     <link href="scripts/lib/leaflet/dist/leaflet.css" rel="stylesheet">
     <link href="scripts/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/cloudy.css" rel="stylesheet">
 	<link href="scripts/lib/leaflet-draw/dist/leaflet.draw.css" rel="stylesheet" />
 	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link href="css/cloudy.css" rel="stylesheet">
 	
 </head>
   
@@ -61,7 +61,7 @@
 	<script>
 		
     
-	var map = L.map('map', {zoomControl: false}).setView([55, 10], 5);
+	var map = L.map('map', {zoomControl: false}).setView([56, 11], 8);
 
     
 
@@ -108,7 +108,7 @@
             $actionButton.text('Select area');
         } else {
             $actionButton.addClass('editing');
-            select.enable();
+            select.enablePolygon();
             $actionButton.html('<i class="fa fa-times"</i>');
         }
     });
@@ -160,7 +160,7 @@
     function startViewer(outline, table) {
 		if(outline != null) {
 			
-			open("visualize.html?outline="+outline+"&table="+table);
+			open("viewer.html?outline="+outline+"&table="+table);
 		} else {
 			window.alert("No point cloud selected");
 		}
